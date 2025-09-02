@@ -33,6 +33,8 @@ def readRotAndTrans(paths):
   # - 'Reference volume for motion correction'
   # - shim images: 'Shim Adjust ROI', Phase Unwrapped fieldmap', 'Field_Map'
   imageComments = [ str.split(x.ImageComments) for x in ds if 'ImageComments' in x and str.split(x.ImageComments)[offset+0] == 'R:' ]
+  # 20250902 when using real-time frequency feedback, the values will be in the ImageComments
+  # 'R:', 'T:', 'F:' strings are elements 0,5,9. Frequency change is element 10 (these are pre-XA60 element numbers)
 
   return list(itertools.chain.from_iterable([head, [ (np.array(list(map(float, y[offset+1:offset+5]))), list(map(float, y[offset+6:offset+9]))) for y in imageComments] ]))
 
