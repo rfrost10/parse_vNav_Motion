@@ -16,13 +16,25 @@ def readRotAndTrans(paths):
 
   head = [(np.array([1,0,0,0]),np.array([0,0,0]))]
   ds = sorted([pydicom.dcmread(x) for x in files], key=lambda dcm: dcm.AcquisitionNumber)
+
+  # 20250902 XA60 (Terra.X) has 'Not for diagnotic use,' in the ImageComments and the motion info gets appended
+  if (str.split(ds[0].ImageComments)[0] == 'Not'):
+    print('this is XA60 data, with "Not for diagnotic use," in ImageComments')
+    print(f'first ImageComments: {ds[0].ImageComments}')
+    offset = 4
+  else:
+    print('this is pre-XA60 data')
+    offset = 0
+  print(f'value offset set to: {offset}')
+
+
   #imageComments = [ str.split(x.ImageComments) for x in ds[1:] if 'ImageComments' in x ]
   # want to avoid
   # - 'Reference volume for motion correction'
   # - shim images: 'Shim Adjust ROI', Phase Unwrapped fieldmap', 'Field_Map'
-  imageComments = [ str.split(x.ImageComments) for x in ds if 'ImageComments' in x and str.split(x.ImageComments)[0] == 'R:' ]
+  imageComments = [ str.split(x.ImageComments) for x in ds if 'ImageComments' in x and str.split(x.ImageComments)[offset+0] == 'R:' ]
 
-  return list(itertools.chain.from_iterable([head, [ (np.array(list(map(float, y[1:5]))), list(map(float, y[6:9]))) for y in imageComments] ]))
+  return list(itertools.chain.from_iterable([head, [ (np.array(list(map(float, y[offset+1:offset+5]))), list(map(float, y[offset+6:offset+9]))) for y in imageComments] ]))
 
 def angleAxisToQuaternion(a):
   w = np.cos(a[0] / 2.0)
