@@ -17,11 +17,15 @@ def readRotAndTrans(paths):
   head = [(np.array([1,0,0,0]),np.array([0,0,0]))]
   ds = sorted([pydicom.dcmread(x) for x in files], key=lambda dcm: dcm.AcquisitionNumber)
 
+  print(f'first ImageComments: {ds[0].ImageComments}')
   # 20250902 XA60 (Terra.X) has 'Not for diagnotic use,' in the ImageComments and the motion info gets appended
   if (str.split(ds[0].ImageComments)[0] == 'Not'):
-    print('this is XA60 data, with "Not for diagnotic use," in ImageComments')
-    print(f'first ImageComments: {ds[0].ImageComments}')
-    offset = 4
+    if (str.split(ds[0].ImageComments)[4] == 'Brain,'):
+        offset = 5
+        print('this is XA60 data from BWH, with "Not for diagnotic use,  Brain," in ImageComments')
+    else:
+        offset = 4
+        print('this is XA60 data, with "Not for diagnotic use," in ImageComments')
   else:
     print('this is pre-XA60 data')
     offset = 0
