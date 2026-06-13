@@ -32,11 +32,21 @@ def readRotAndTrans(paths):
   print(f'value offset set to: {offset}')
 
 
+  # 20260613 some ImageComments seem to be empty which causes an error later
+  n1 = len(ds)
+  print(f'before removing empty ImageComments... number of dicoms: {n2}')
+  ds = [ x for x in ds if 'ImageComments' in x and len(str.split(x.ImageComments))>offset ]
+  n2 = len(ds)
+  print(f'after removing empty ImageComments...  number of dicoms: {n2}')
+  if n1 != n2:
+      print('WARNING! there were empty ImageComments...')
+
   #imageComments = [ str.split(x.ImageComments) for x in ds[1:] if 'ImageComments' in x ]
   # want to avoid
   # - 'Reference volume for motion correction'
   # - shim images: 'Shim Adjust ROI', Phase Unwrapped fieldmap', 'Field_Map'
-  imageComments = [ str.split(x.ImageComments) for x in ds if 'ImageComments' in x and str.split(x.ImageComments)[offset+0] == 'R:' ]
+  imageComments = [ str.split(x.ImageComments) for x in ds if str.split(x.ImageComments)[offset+0] == 'R:' ]
+  print(f'number of imageComments: {len(imageComments)}')
   # 20250902 when using real-time frequency feedback, the values will be in the ImageComments
   # 'R:', 'T:', 'F:' strings are elements 0,5,9. Frequency change is element 10 (these are pre-XA60 element numbers)
 
